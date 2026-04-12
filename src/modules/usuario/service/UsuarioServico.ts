@@ -5,6 +5,7 @@ import { UsuarioLoginDTO } from "../dtos/UsuarioLogin.DTO";
 import { UsuarioRespostaDTO } from "../dtos/UsuarioResposta.DTO";
 import { config } from "../../../../config";
 import jwt from "jsonwebtoken";
+import { Endereco } from "../schema/Endereco.schema";
 
 export class UsuarioService {
   constructor(private usuarioRepositorio: IUsuarioRepositorio) {}
@@ -28,8 +29,10 @@ export class UsuarioService {
       email: dados.email,
       telefone: dados.telefone,
       senha: senhaHash,
-      cep: dados.cep,
       cpf: dados.cpf,
+      enderecos: dados.enderecos?.map((endereco) =>
+        Object.assign(new Endereco(), endereco),
+      ),
     });
 
     return {
@@ -53,7 +56,7 @@ export class UsuarioService {
     }
 
     const token = jwt.sign(
-      { id: usuario.id, email: usuario.email },
+      { id: usuario.id, email: usuario.email, papel: usuario.papel },
       config.secret,
       {
         expiresIn: "3h",

@@ -14,6 +14,7 @@ export class App {
 
   private config() {
     this._app.use(express.json());
+    this._app.set("trusty proxy", true);
   }
 
   private routes() {

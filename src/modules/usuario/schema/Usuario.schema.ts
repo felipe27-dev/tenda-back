@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Endereco } from "./Endereco.schema";
+import { Contrato } from "../../contrato/schema/Contrato.schema";
 
 @Entity("usuarios")
 export class Usuario {
@@ -23,9 +26,6 @@ export class Usuario {
   @Column({ length: 14 })
   cpf!: string;
 
-  @Column({ length: 8 })
-  cep!: string;
-
   @Column({ default: "CLIENTE" })
   papel!: "ADMIN" | "CLIENTE";
 
@@ -40,4 +40,12 @@ export class Usuario {
 
   @UpdateDateColumn()
   atualizado_em!: Date;
+
+  @OneToMany(() => Endereco, (endereco) => endereco.usuario, {
+    cascade: true,
+  })
+  enderecos!: Endereco[];
+
+  @OneToMany(() => Contrato, (contrato) => contrato.usuario)
+  contratos!: Contrato[];
 }
