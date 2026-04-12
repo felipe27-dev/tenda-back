@@ -20,18 +20,18 @@ export class App {
     this._app.use(routesMain);
   }
 
-  private initDatabase() {
-    AppDataSource.initialize()
-      .then(() => {
-        console.log("DataBase connected");
-      })
-      .catch((error) => {
-        console.error("DataBase error", error);
-      });
+  private async initDatabase(): Promise<void> {
+    try {
+      await AppDataSource.initialize();
+      console.log("DataBase connected");
+    } catch (error) {
+      console.error("DataBase error:", error);
+      process.exit(1); // Encerra a aplicação se não conseguir conectar
+    }
   }
 
-  public listen() {
-    this.initDatabase();
+  public async listen(): Promise<void> {
+    await this.initDatabase(); // Aguarda a conexão com o banco
 
     this._app.listen(config.port, () =>
       console.log(`Servidor rodando na porta ${config.port}`),

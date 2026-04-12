@@ -1,21 +1,15 @@
-import { DataSource } from "typeorm";
 import { IUsuarioRepositorio } from "../repository/IUsuarioRepositorio";
-import { CriarUsuarioPFDTO } from "../dtos/CriarUsuarioPF.DTO";
-import { CriarUsuarioPJDTO } from "../dtos/CriarUsuarioPJ.DTO";
-import { Usuario } from "../schema/Usuario.schema";
 import bcrypt from "bcrypt";
-import { PessoaFisica } from "../schema/PessoaFisica.schema";
-import { PessoaJuridica } from "../schema/PessoaJuridica.schema";
+import { UsuarioBaseDTO } from "../dtos/UsuarioBase.DTO";
+import { UsuarioLoginDTO } from "../dtos/UsuarioLogin.DTO";
+import { UsuarioRespostaDTO } from "../dtos/UsuarioResposta.DTO";
+import { config } from "../../../../config";
+import jwt from "jsonwebtoken";
 
 export class UsuarioService {
-  constructor(
-    private usuarioRepositorio: IUsuarioRepositorio,
-    private dataSource: DataSource,
-  ) {}
+  constructor(private usuarioRepositorio: IUsuarioRepositorio) {}
 
-  async cadastrar(
-    dados: CriarUsuarioPFDTO | CriarUsuarioPJDTO,
-  ): Promise<Usuario> {
+  async cadastrar(dados: UsuarioBaseDTO): Promise<UsuarioRespostaDTO> {
     if (!dados.email || !dados.senha || !dados.telefone) {
       throw new Error("Dados obrigatórios faltando.");
     }
@@ -30,44 +24,42 @@ export class UsuarioService {
 
     const senhaHash = await bcrypt.hash(dados.senha, 10);
 
-    return await this.dataSource.transaction(async (manager) => {
-      const usuario = manager.create(Usuario, {
-        email: dados.email,
-        telefone: dados.telefone,
-        senha: senhaHash,
-        tipo_pessoa: dados.tipo_usuario,
-      });
-
-      await manager.save(usuario);
-
-      if (dados.tipo_usuario == "PF") {
-        const dadosPF = dados as CriarUsuarioPFDTO;
-
-        const pf = manager.create(PessoaFisica, {
-          cpf: dadosPF.cpf,
-          nome: dadosPF.nome,
-          usuario: usuario,
-          data_nascimento: dadosPF.data_nascimento,
-        });
-
-        await manager.save(pf);
-      }
-
-      if (dados.tipo_usuario == "PJ") {
-        const dadosPJ = dados as CriarUsuarioPJDTO;
-
-        const pj = manager.create(PessoaJuridica, {
-          cnpj: dadosPJ.cnpj,
-          razao_social: dadosPJ.razao_social,
-          usuario: usuario,
-        });
-
-        await manager.save(pj);
-      }
-
-      delete usuario.senha;
-
-      return usuario;
+    const usuario = await this.usuarioRepositorio.criarUsuario({
+      email: dados.email,
+      telefone: dados.telefone,
+      senha: senhaHash,
+      cep: dados.cep,
+      cpf: dados.cpf,
     });
+
+    return {
+      id: usuario.id,
+      email: usuario.email,
+      telefone: usuario.telefone,
+    };
+  }
+
+  async login(dados: UsuarioLoginDTO): Promise<string> {
+    const usuario = await this.usuarioRepositorio.buscarPorEmail(dados.email);
+
+    if (!usuario) {
+      throw new Error("Usuario não existe");
+    }
+
+    const senhaValida = await bcrypt.compare(dados.senha, usuario.senha);
+
+    if (!senhaValida) {
+      throw new Error("Senha invalida.");
+    }
+
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email },
+      config.secret,
+      {
+        expiresIn: "3h",
+      },
+    );
+
+    return token;
   }
 }
