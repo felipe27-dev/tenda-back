@@ -2,12 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { PessoaFisica } from "./PessoaFisica.schema";
-import { PessoaJuridica } from "./PessoaJuridica.schema";
 
 @Entity("usuarios")
 export class Usuario {
@@ -21,7 +18,13 @@ export class Usuario {
   telefone!: string;
 
   @Column({ length: 255 })
-  senha?: string;
+  senha!: string;
+
+  @Column({ length: 14 })
+  cpf!: string;
+
+  @Column({ length: 8 })
+  cep!: string;
 
   @Column({ default: "CLIENTE" })
   papel!: "ADMIN" | "CLIENTE";
@@ -37,16 +40,4 @@ export class Usuario {
 
   @UpdateDateColumn()
   atualizado_em!: Date;
-
-  @Column({
-    type: "enum",
-    enum: ["PF", "PJ"],
-  })
-  tipo_pessoa!: "PF" | "PJ";
-
-  @OneToOne(() => PessoaFisica, (pf) => pf.usuario)
-  pessoaFisica?: PessoaFisica;
-
-  @OneToOne(() => PessoaJuridica, (pj) => pj.usuario)
-  pessoaJuridica?: PessoaJuridica;
 }

@@ -3,6 +3,7 @@ import { Usuario } from "../schema/Usuario.schema";
 import { IUsuarioRepositorio } from "./IUsuarioRepositorio";
 
 export class UsuarioRepository implements IUsuarioRepositorio {
+  
   constructor(private repositorio: Repository<Usuario>) {}
 
   async criarUsuario(dados: Partial<Usuario>): Promise<Usuario> {
