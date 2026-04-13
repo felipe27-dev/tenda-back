@@ -40,7 +40,7 @@ export class Contrato {
     default: StatusContrato.PENDENTE,
   })
   status!: StatusContrato;
-
+  
   @Column({ type: "decimal", precision: 10, scale: 2 })
   valor_kwh!: number;
 
