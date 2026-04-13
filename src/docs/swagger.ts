@@ -212,7 +212,7 @@ const options: Options = {
     },
     security: [{ bearerAuth: [] }],
     paths: {
-      "/usuarios": {
+      "/usuarios/registrar": {
         post: {
           tags: ["Usuários"],
           summary: "Cadastrar um novo usuário",
