@@ -3,7 +3,7 @@ import "dotenv/config";
 export const config = {
   mode: process.env.NODE_ENV || "development",
 
-  secret: "42938423094u204ut4",
+  secret: process.env.SECRET || "dadaejf94uf249u2j",
   port: Number(process.env.PORT) || 3000,
 
   db: {

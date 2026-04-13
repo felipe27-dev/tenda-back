@@ -2,6 +2,8 @@ import express, { Application } from "express";
 import { AppDataSource } from "./src/database/data-source";
 import { config } from "./config";
 import routesMain from "./src/routes";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./src/docs/swagger";
 
 export class App {
   private _app: Application;
@@ -14,6 +16,8 @@ export class App {
 
   private config() {
     this._app.use(express.json());
+    this._app.set("trusty proxy", true);
+    this._app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   }
 
   private routes() {
@@ -36,6 +40,10 @@ export class App {
     this._app.listen(config.port, () =>
       console.log(`Servidor rodando na porta ${config.port}`),
     );
+
+    console.log(
+      `📚 Documentação disponível em: http://localhost:${config.port}/api-docs",
+    `);
   }
 
   public get app() {
