@@ -1,6 +1,7 @@
 import express, { Application } from "express";
 import { AppDataSource } from "./src/database/data-source";
 import { config } from "./config";
+import  cors  from "cors";
 import routesMain from "./src/routes";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./src/docs/swagger";
@@ -16,7 +17,12 @@ export class App {
 
   private config() {
     this._app.use(express.json());
-    this._app.set("trusty proxy", true);
+    this._app.use(cors({
+            origin: 'http://localhost:5173',
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+            credentials: true
+    }));
+    this._app.set("trust proxy", true);
     this._app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   }
 
